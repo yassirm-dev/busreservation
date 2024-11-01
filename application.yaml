@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-argocd
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yassirm-dev/nginx-argocd.git
+
+    #HEAD updates to the latest commit
+    targetRevision: HEAD
+
+    # Syncs/track a specific folder in therepo
+    path: .
+
+  destination:
+
+    #address of API server
+    server: https://kubernetes.default.svc
+
+    #Argocd will create the config in the new namespace
+    namespace: nginx-argocd
+
+  #
+  syncPolicy:
+    syncOptions:
+    #Argocd will create NS for its configs incase it does't exist
+      - CreateNamespace=true
+
+      #Argocd will auto sync changes in Git Repo
+    automated: 
+      selfHeal: true #argocd will trigger auto healing when changes are made in the live cluster
+      prune: true    # Argocd will effect any changes made in the Git repo to live environment.
+      
