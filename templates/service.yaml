@@ -11,5 +11,10 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.service.port }
+      targetPort: https
+      protocol: TCP
+      name: https
+    
   selector:
     {{- include "bus-reservation.selectorLabels" . | nindent 4 }}
