@@ -4,6 +4,7 @@ metadata:
   name: {{ include "bus-reservation.fullname" . }}
   labels:
     {{- include "bus-reservation.labels" . | nindent 4 }}
+    appLabel: bus-reservation
 spec:
   type: {{ .Values.service.type }}
   ports:
