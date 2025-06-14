@@ -5,6 +5,14 @@
 replicaCount: 1
 # Number of pod replicas to run
 
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+
 image:
   repository: yassirdevopseng/bus_reservation
   # Docker image repository
