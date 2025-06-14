@@ -2,24 +2,81 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 3
+replicaCount: 1
+# Number of pod replicas to run
 
 image:
-  repository: nginx
+  repository: yassirdevopseng/bus_reservation
+  # Docker image repository
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+  # Image pull policy
+  tag: "1.4"
+  # Image tag/version
 
 serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Automatically mount a ServiceAccount's API credentials?
+  create: false
+  # Do not create a new service account (using existing one)
+  name: bus-reservation-argocd
+  # Name of the service account to use
   automount: true
-  # Annotations to add to the service account
+  # Automatically mount the service account token in the pod
+
+service:
+  type: NodePort
+  # Service type to expose pods (NodePort in this case)
+  port: 80
+  # Port on which the service is exposed
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  # Probe to check if the container is alive
+  timeoutSeconds: 1
+  # Timeout for the probe request
+  periodSeconds: 10
+  # Interval between probe requests
+  failureThreshold: 3
+  # Number of failures before marking pod unhealthy
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  # Probe to check if the container is ready to serve traffic
+  timeoutSeconds: 1
+  periodSeconds: 10
+  failureThreshold: 3
+
+volumes:
+  - name: kube-api-access
+    projected:
+      sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            name: kube-root-ca.crt
+        - downwardAPI: {}
+  # Volume to provide service account credentials and config data to pod
+
+volumeMounts:
+  - name: kube-api-access
+    mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+    readOnly: true
+  # Mount path inside container for service account tokens
+
+tolerations:
+  - key: "node.kubernetes.io/not-ready"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 300
+  - key: "node.kubernetes.io/unreachable"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 300
+  # Allows pod to tolerate node conditions like NotReady or Unreachable for 5 minutes
+
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
@@ -42,34 +99,6 @@ securityContext: {}
 service:
   type: NodePort
   port: 80
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
 
 livenessProbe:
   httpGet:
