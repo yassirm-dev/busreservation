@@ -20,7 +20,9 @@ serviceAccount:
   # Name of the service account to use
   automount: true
   # Automatically mount the service account token in the pod
-
+ingress:
+  enabled: false
+#Disabled Ingress - Enable at your comfort. 
 service:
   type: NodePort
   # Service type to expose pods (NodePort in this case)
